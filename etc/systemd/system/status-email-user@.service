@@ -5,7 +5,8 @@
 Description=Send status email for %i to user
 
 [Service]
+EnvironmentFile=/etc/restic/email.conf
 Type=oneshot
-ExecStart=/usr/local/sbin/systemd-email abc@gmail.com %i
+ExecStart=/usr/local/sbin/systemd-email $RECIPIENT %i
 User=root
 Group=systemd-journal
