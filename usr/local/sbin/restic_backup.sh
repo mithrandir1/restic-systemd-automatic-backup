@@ -22,7 +22,7 @@ BACKUP_PATHS=""
 while read path
 do 
 	BACKUP_PATHS+="$path "
-done < backup_paths
+done < /etc/restic/backup_paths
 
 BACKUP_EXCLUDES="--exclude-file /etc/restic/backup_exclude"
 for dir in /home/*
@@ -33,7 +33,7 @@ do
 	fi
 done
 
-BACKUP_TAG=systemd.timer
+BACKUP_TAG=${BACKUP_TAG:-systemd.timer}
 
 # NOTE start all commands in background and wait for them to finish.
 # Reason: bash ignores any signals while child process is executing and thus my trap exit hook is not triggered.
@@ -51,7 +51,7 @@ wait $!
 restic backup \
 	--verbose \
 	--one-file-system \
-	--tag $BACKUP_TAG \
+	--tag "$BACKUP_TAG" \
 	$RESTIC_OPTIONS \
 	$BACKUP_EXCLUDES \
 	$BACKUP_PATHS &
@@ -62,7 +62,7 @@ wait $!
 # --group-by only the tag and path, and not by hostname. This is because I create a B2 Bucket per host, and if this hostname accidentially change some time, there would now be multiple backup sets.
 restic forget \
 	--verbose \
-	--tag $BACKUP_TAG \
+	--tag "$BACKUP_TAG" \
 	$RESTIC_OPTIONS \
         --prune \
 	--group-by "paths,tags" \
